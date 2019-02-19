@@ -45,7 +45,7 @@
         }
     },
     "variables": {
-        "pinkplatformName": "[concat('pinkplatform', uniqueString(resourceGroup().id))]",
+        "pinkplatformName": "pinkplatform",
         "fullyQualifiedtestName": "[concat(variables('pinkplatformName'), '/', parameters('testName'))]"
     },
     "resources": [

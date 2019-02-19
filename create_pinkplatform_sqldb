@@ -1,0 +1,100 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "pinkplatformAdminLogin": {
+            "minLength": 1,
+            "type": "String"
+        },
+        "pinkplatformAdminLoginPassword": {
+            "type": "SecureString"
+        },
+        "testName": {
+            "minLength": 1,
+            "type": "String"
+        },
+        "testCollation": {
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+            "minLength": 1,
+            "type": "String"
+        },
+        "testEdition": {
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ],
+            "type": "String"
+        },
+        "testRequestedServiceObjectiveName": {
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "S0",
+                "S1",
+                "S2",
+                "P1",
+                "P2",
+                "P3"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "Describes the performance level for Edition"
+            }
+        }
+    },
+    "variables": {
+        "pinkplatformName": "[concat('pinkplatform', uniqueString(resourceGroup().id))]",
+        "fullyQualifiedtestName": "[concat(variables('pinkplatformName'), '/', parameters('testName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Sql/servers",
+            "name": "[variables('pinkplatformName')]",
+            "apiVersion": "2014-04-01-preview",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "pinkplatform"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('pinkplatformAdminLogin')]",
+                "administratorLoginPassword": "[parameters('pinkplatformAdminLoginPassword')]"
+            },
+            "resources": [
+                {
+                    "type": "firewallrules",
+                    "name": "AllowAllWindowsAzureIps",
+                    "apiVersion": "2014-04-01-preview",
+                    "location": "[resourceGroup().location]",
+                    "properties": {
+                        "startIpAddress": "0.0.0.0",
+                        "endIpAddress": "0.0.0.0"
+                    },
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', variables('pinkplatformName'))]"
+                    ]
+                }
+            ],
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "name": "[variables('fullyQualifiedtestName')]",
+            "apiVersion": "2014-04-01-preview",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "test"
+            },
+            "properties": {
+                "collation": "[parameters('testCollation')]",
+                "edition": "[parameters('testEdition')]",
+                "maxSizeBytes": "1073741824",
+                "requestedServiceObjectiveName": "[parameters('testRequestedServiceObjectiveName')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('pinkplatformName'))]"
+            ]
+        }
+    ]
+}

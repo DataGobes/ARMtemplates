@@ -92,9 +92,7 @@
                 "maxSizeBytes": "1073741824",
                 "requestedServiceObjectiveName": "[parameters('testRequestedServiceObjectiveName')]"
             },
-            "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers', variables('pinkplatformName'))]"
-            ]
+            "dependsOn": []
         }
     ]
 }
